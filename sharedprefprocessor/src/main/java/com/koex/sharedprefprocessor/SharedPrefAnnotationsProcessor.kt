@@ -2,6 +2,8 @@ package com.koex.sharedprefprocessor
 
 import com.google.auto.service.AutoService
 import com.koex.sharedpref.SharedPrefClient
+import com.koex.sharedpref.typeannotations.SharedPrefBoolean
+import com.koex.sharedpref.typeannotations.SharedPrefInteger
 import com.squareup.kotlinpoet.*
 import java.io.File
 import javax.annotation.processing.*
@@ -14,11 +16,13 @@ import javax.lang.model.util.ElementFilter
 @AutoService(Processor::class) // For registering the service
 @SupportedSourceVersion(SourceVersion.RELEASE_8) // to support Java 8
 @SupportedOptions(SharedPrefAnnotationsProcessor.KAPT_KOTLIN_GENERATED_OPTION_NAME)
-@SupportedAnnotationTypes("com.koex.sharedpref.SharedPrefClient")
+@SupportedAnnotationTypes("com.koex.sharedpref.SharedPrefClient", "com.koex.sharedpref.typeannotations.SharedPrefInteger")
 class SharedPrefAnnotationsProcessor : AbstractProcessor() {
 
-    override fun process(typeElementsSet: MutableSet<out TypeElement>?, roundEnvironment: RoundEnvironment?): Boolean {
+    var processingRound = 0
 
+    override fun process(typeElementsSet: MutableSet<out TypeElement>?, roundEnvironment: RoundEnvironment?): Boolean {
+        processingEnv.printMessage("\n Processing Round ${++processingRound}")
         val generatedSourcesRoot: String = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME].orEmpty()
         if(generatedSourcesRoot.isEmpty()) {
             processingEnv.printErrorMessage(
@@ -27,8 +31,15 @@ class SharedPrefAnnotationsProcessor : AbstractProcessor() {
             return false
         }else{
             processingEnv.printMessage(
-                "Found path for Kotlin Generated Code: $generatedSourcesRoot"
+                "\nFound path for Kotlin Generated Code: $generatedSourcesRoot"
             )
+        }
+        roundEnvironment?.getElementsAnnotatedWith(SharedPrefInteger::class.java)?.forEach { intElement ->
+            processingEnv.printMessage(
+                "\n Integer Element name is ${intElement.simpleName} and kind is ${intElement.kind}"
+            )
+
+
         }
 
         roundEnvironment?.getElementsAnnotatedWith(SharedPrefClient::class.java)?.forEach { classElement ->
@@ -37,11 +48,19 @@ class SharedPrefAnnotationsProcessor : AbstractProcessor() {
                     "SharedPrefClient annotation Can only be applied to classes,  element: $classElement "
                 )
                 return false
+            } else{
+                processingEnv.printMessage(
+                    "\n Class Element name is ${classElement.simpleName}"
+                )
             }
 
             val fieldsInArgument = ElementFilter.fieldsIn(classElement.enclosedElements)
 
             val annotationArgs = classElement.getAnnotation(SharedPrefClient::class.java).prefFileName
+//            fieldsInArgument.forEach{element ->
+//                processingEnv.printMessage("\nGot element ${element.simpleName} with Annotaions ${element.getAnnotation(SharedPrefInteger::class.java)}")
+//            }
+
 
             val className = classElement.simpleName.toString()+"Client"
             val file = File(generatedSourcesRoot).apply { mkdir() }
@@ -66,11 +85,6 @@ class SharedPrefAnnotationsProcessor : AbstractProcessor() {
 
 
         }
-
-
-
-
-
 
         return true
     }

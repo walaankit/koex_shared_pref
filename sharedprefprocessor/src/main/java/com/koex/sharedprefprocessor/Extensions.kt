@@ -5,9 +5,9 @@ import javax.tools.Diagnostic
 
 
 fun ProcessingEnvironment.printErrorMessage(message: String?){
-    messager.printMessage(Diagnostic.Kind.ERROR, message)
+    messager.printMessage(Diagnostic.Kind.ERROR, message )
 }
 
 fun ProcessingEnvironment.printMessage(message: String?){
-    messager.printMessage(Diagnostic.Kind.NOTE, message)
+    messager.printMessage(Diagnostic.Kind.NOTE, message )
 }
