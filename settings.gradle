@@ -1,0 +1,4 @@
+include ':sharedprefprocessor'
+include ':sharedpref'
+include ':app'
+rootProject.name = "SharedPrefClientApp"
