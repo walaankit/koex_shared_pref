@@ -13,13 +13,13 @@ import androidx.preference.PreferenceManager
 class TestSharedPrefClient(private val context: Application) {
     val prefName: String? = null //or "any string which is given in Annotations arguments"
 
-    val preferences: SharedPreferences? by lazy {
+    val preferences: SharedPreferences? =
         prefName?.let {
             context.getSharedPreferences(it, Context.MODE_PRIVATE)
         }?.run {
             PreferenceManager.getDefaultSharedPreferences(context)
         }
-    }
+
 
 //    fun setTestInt(testInt: Int){
 //        preferences?.edit(commit = true){
